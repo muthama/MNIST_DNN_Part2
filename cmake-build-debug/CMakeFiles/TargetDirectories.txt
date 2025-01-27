@@ -1,0 +1,3 @@
+/Users/muthama/CLionProjects/MNIST_DNN_Part2/cmake-build-debug/CMakeFiles/MNIST_DNN_Part2.dir
+/Users/muthama/CLionProjects/MNIST_DNN_Part2/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/muthama/CLionProjects/MNIST_DNN_Part2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
