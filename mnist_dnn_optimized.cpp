@@ -24,6 +24,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <algorithm>
+#include <chrono>     // For timing measurements
+#include <iomanip>    // For output formatting
 
 // -------------------------- Network Configuration -------------------------- //
 // The network's structure is defined by these constants, carefully chosen
@@ -540,7 +542,7 @@ private:
 
 /**
  * Main Program Implementation
- * 
+ *
  * This section implements the primary program flow for training and evaluating
  * the neural network on the MNIST dataset. The process follows these key steps:
  * 1. Load and preprocess the MNIST data
@@ -605,6 +607,9 @@ int main(int argc, char **argv) {
     // Iterate through multiple epochs
     // Each epoch processes the entire training set once
     for (int epoch = 0; epoch < EPOCHS; ++epoch) {
+        // Start timing this epoch
+        auto epochStart = std::chrono::high_resolution_clock::now();
+
         // Training metrics for this epoch
         int correctCount = 0; // Number of correct predictions
         float epochLoss = 0.0f; // Cumulative loss for this epoch
@@ -635,18 +640,23 @@ int main(int argc, char **argv) {
             dnn.backward(trainImages[i], trainLabels[i]);
         }
 
+        // End timing for this epoch
+        auto epochEnd = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> epochDuration = epochEnd - epochStart;
+
         // ------------ Epoch Performance Reporting ------------
 
         // Calculate and display training accuracy for this epoch
         float trainAccuracy = (100.0f * correctCount) / TRAINING_SAMPLES;
-        std::cout << "Epoch " << (epoch + 1)
-                << " - Train Accuracy: " << trainAccuracy << "%, Loss: "
-                << epochLoss << std::endl;
 
         // ------------ Evaluation on Test Set ------------
 
         // After each epoch, evaluate performance on test set
         // This helps monitor for overfitting
+
+        // Start timing test set evaluation
+        auto testStart = std::chrono::high_resolution_clock::now();
+
         int testCorrect = 0;
         for (int i = 0; i < TEST_SAMPLES; ++i) {
             int pred = dnn.predict(testImages[i]);
@@ -655,15 +665,23 @@ int main(int argc, char **argv) {
             }
         }
 
+        // End timing test set evaluation
+        auto testEnd = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> testDuration = testEnd - testStart;
+
         // Calculate and display test accuracy
         float testAccuracy = (100.0f * testCorrect) / TEST_SAMPLES;
-        std::cout << "         Test Accuracy: " << testAccuracy << "%\n";
 
-        // Note: In a more complete implementation, you might want to:
-        // 1. Save the model if it achieves best test accuracy so far
-        // 2. Implement early stopping if test accuracy plateaus
-        // 3. Track additional metrics like confusion matrix
-        // 4. Adjust learning rate based on performance
+
+        // Print results with timing information and loss
+        std::cout << "Epoch " << std::setw(2) << (epoch + 1)
+                << " - Training Accuracy: " << std::fixed << std::setprecision(4)
+                << trainAccuracy << "%, Loss: " << epochLoss
+                << " (time: " << std::setprecision(2) << epochDuration.count() << "s)"
+                << "\n         Test Accuracy: " << std::fixed << std::setprecision(2)
+                << testAccuracy << "%"
+                << " (time: " << std::setprecision(2) << testDuration.count() << "s)"
+                << std::endl;
     }
 
     return 0;
